@@ -82,3 +82,14 @@ public:
         return boost::any(combo->GetValue());
     }
 };
+
+// Alternative approach, just construct the sizer, populate it, and return it in one go
+
+wxSizer* make_TextBox(wxFrame* parent, std::string label, std::string default_text = "", const wxSize & size = wxDefaultSize) 
+{
+    wxSizer* _sizer = new wxBoxSizer(wxHORIZONTAL);
+    wxTextCtrl* _text = new wxTextCtrl(parent, -1, _(default_text), wxDefaultPosition, size );
+    _sizer->Add(new wxStaticText(parent, -1, label));
+    _sizer->Add(_text);
+    return _sizer;
+}

@@ -43,10 +43,11 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
     wxSizer *sizer = new wxBoxSizer(wxVERTICAL);
     // create text ctrl with minimal size 100x60
     std::vector<wxString> choices {wxT("A"), wxT("B"), wxT("C")};
-    TextBoxItem a = TextBoxItem(this, "Test!", "", wxSize(100,30));
+    TextBoxItem a = TextBoxItem (this, "Test!", "", wxSize(100,30));
     ComboItem b = ComboItem(this, "COMBO!", choices);
     sizer->Add(a.sizer());
     sizer->Add(b.sizer());
+    sizer->Add(make_TextBox(this, "Test!", "", wxSize(100,30)));
     menuFile->Append(ID_Hello, "&Hello...\tCtrl-H",
                      "Help string shown in status bar for this menu item");
     menuFile->AppendSeparator();
