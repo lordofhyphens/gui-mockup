@@ -1,10 +1,12 @@
-.PHONY: all clean test
+.PHONY: all clean test valgrind
 
 all: harness
 test: harness
-	./harness
+	@./harness
+valgrind: harness
+	valgrind --leak-check=full ./$<
 clean: 
 	rm -f harness *.o
 harness: harness.cpp ConfigGUI.h
-	g++ `wx-config --cxxflags --libs` -o $@ $<
+	g++ -std=c++11 `wx-config --cxxflags --libs` -o $@ $<
 
