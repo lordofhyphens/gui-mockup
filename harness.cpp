@@ -1,10 +1,12 @@
 // wxWidgets "Hello world" Program
 // For compilers that support precompilation, includes "wx/wx.h".
+//
+// Included to provide a experimentation harness for UI elements.
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
     #include <wx/wx.h>
 #endif
-#include "ConfigGUI.h"
+#include "OptionsGroup.hpp"
 class MyApp: public wxApp
 {
 public:
@@ -39,15 +41,12 @@ bool MyApp::OnInit()
 MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
         : wxFrame(NULL, wxID_ANY, title, pos, size)
 {
+    Slic3r::OptionsGroup t = Slic3r::OptionsGroup(this, "Test!");
+    t.append_line(Slic3r::Line(Slic3r::Option(1, Slic3r::FieldTypes::TEXT, "", "Text field", "This is a generic text field", false)));
     wxMenu *menuFile = new wxMenu;
     wxSizer *sizer = new wxBoxSizer(wxVERTICAL);
     // create text ctrl with minimal size 100x60
-    std::vector<wxString> choices {wxT("A"), wxT("B"), wxT("C")};
-    TextBoxItem a = TextBoxItem (this, "Test!", "", wxSize(100,30));
-    ComboItem b = ComboItem(this, "COMBO!", choices);
-    sizer->Add(a.sizer());
-    sizer->Add(b.sizer());
-    sizer->Add(make_TextBox(this, "Test!", "", wxSize(100,30)));
+    sizer->Add(t.sizer());
     menuFile->Append(ID_Hello, "&Hello...\tCtrl-H",
                      "Help string shown in status bar for this menu item");
     menuFile->AppendSeparator();
