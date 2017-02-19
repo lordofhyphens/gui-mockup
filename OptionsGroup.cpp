@@ -14,7 +14,7 @@ namespace Slic3r {
 
 void OptionsGroup::BUILD() {
     if (staticbox) {
-        wxStaticBox* box = new wxStaticBox(parent, -1, title);
+        wxStaticBox* box = new wxStaticBox(_parent, -1, title);
         _sizer = new wxStaticBoxSizer(box, wxVERTICAL);
     } else {
         _sizer = new wxBoxSizer(wxVERTICAL);
@@ -29,17 +29,6 @@ void OptionsGroup::BUILD() {
     _sizer->Add(_grid_sizer, 0, wxEXPAND | wxALL, BORDER(0,5));
 }
 
-FieldTypes Option::default_type(FieldTypes in) {
-    switch (in) {
-        case FieldTypes::INTEGER:
-            return FieldTypes::I_TEXT;
-        case FieldTypes::FLOAT:
-            return FieldTypes::F_TEXT;
-        default:
-            return FieldTypes::TEXT;
-    }
-}
-
 void OptionsGroup::append_line(const Line& line) {
     if (line.has_sizer() || (line.has_widget() && line.full_width)) {
         wxASSERT(line.sizer() != nullptr);
@@ -50,7 +39,7 @@ void OptionsGroup::append_line(const Line& line) {
     // If we have an extra column, build it.
     // If there's a label, build it.
     if (label_width != 0) {
-        wxStaticText* label = new wxStaticText(parent, -1, _(line.label) + ":", wxDefaultPosition);
+        wxStaticText* label = new wxStaticText(_parent, -1, _(line.label) + ":", wxDefaultPosition);
         label->Wrap(label_width);
         if (wxIsEmpty(line.tooltip())) { label->SetToolTip(line.tooltip()); }
         grid_sizer->Add(label, 0, wxALIGN_CENTER_VERTICAL, 0);
@@ -81,15 +70,17 @@ void OptionsGroup::append_line(const Line& line) {
     for (auto& option : line.options()) {
         // add label if any
         if (!wxIsEmpty(option.label)) {
+            wxStaticText* field_label = new wxStaticText(_parent, -1, _(option.label) + ":", wxDefaultPosition, wxDefaultSize);
+            sizer->Add(field_label, 0, wxALIGN_CENTER_VERTICAL,0);
         }
 
         // add field
         Field* field = _build_field(option);
         if (field != nullptr) {
             if (field->has_sizer()) {
-                grid_sizer->Add(field->sizer(), 0, (option.full_width ? wxEXPAND : 0) | wxALIGN_CENTER_VERTICAL, 0);
+                sizer->Add(field->sizer(), 0, (option.full_width ? wxEXPAND : 0) | wxALIGN_CENTER_VERTICAL, 0);
             } else if (field->has_window()) {
-                grid_sizer->Add(field->window(), 0, (option.full_width ? wxEXPAND : 0) | wxALIGN_CENTER_VERTICAL, 0);
+                sizer->Add(field->window(), 0, (option.full_width ? wxEXPAND : 0) | wxALIGN_CENTER_VERTICAL, 0);
             }
         }
 
@@ -115,6 +106,12 @@ Field* OptionsGroup::_build_field(const Option& opt) {
     Field* built_field = nullptr;
     switch (opt.type) {
         case FieldTypes::TEXT:
+            {
+            printf("Making new textctrl\n");
+            TextCtrl* temp = new TextCtrl(_parent, opt);
+            printf("recasting textctrl\n");
+            built_field = dynamic_cast<Field*>(temp);
+            }
             break;
         default:
             break;

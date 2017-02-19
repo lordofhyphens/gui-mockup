@@ -1,3 +1,5 @@
+#ifndef WIDGET_HPP
+#define WIDGET_HPP
 #include <wx/wxprec.h>
 #ifndef WX_PRECOM
 #include <wx/wx.h>
@@ -11,3 +13,4 @@ public:
     bool valid() const { return _sizer != nullptr; } 
     wxSizer* sizer() const { return _sizer; } 
 };
+#endif

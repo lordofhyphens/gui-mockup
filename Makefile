@@ -9,6 +9,10 @@ harness.o: harness.cpp
 	g++ -c ${CXXFLAGS} `wx-config --cxxflags` -o $@ $<
 OptionsGroup.o: OptionsGroup.cpp OptionsGroup.hpp
 	g++ -c ${CXXFLAGS} `wx-config --cxxflags` -o $@ $<
-harness: harness.o OptionsGroup.o
+Field.o: Field.cpp Field.hpp
+	g++ -c ${CXXFLAGS} `wx-config --cxxflags` -o $@ $<
+Option.o: Option.cpp Option.hpp
+	g++ -c ${CXXFLAGS} `wx-config --cxxflags` -o $@ $<
+harness: harness.o OptionsGroup.o Field.o Option.o
 	g++ ${CXXFLAGS} `wx-config --libs` -o $@ $^
 
