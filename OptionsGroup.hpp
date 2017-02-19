@@ -1,10 +1,13 @@
+#ifndef OPTIONSGROUP_HPP
+#define OPTIONSGROUP_HPP
+
 #include <wx/wxprec.h>
 #ifndef WX_PRECOM
 #include <wx/wx.h>
 #endif
 
 #include <boost/any.hpp>
-
+#include <map>
 #include "Widget.hpp"
 #include "Field.hpp"
 namespace Slic3r {
@@ -22,7 +25,7 @@ class OptionsGroup {
         void BUILD(); 
         const bool staticbox;
         wxFrame* parent;
-        std::vector<boost::any> fields;
+        std::map<size_t, Field*> fields;
         Field* _build_field(const Option& opt);
     public:
         const wxString title;
@@ -32,15 +35,14 @@ class OptionsGroup {
         wxFont sidetext_font;
         bool extra_column;
 
-
-        OptionsGroup() : parent(nullptr), title(wxT("")), staticbox(1), fields(std::vector<boost::any>()){};
+        OptionsGroup() : parent(nullptr), title(wxT("")), staticbox(1), fields(std::map<size_t, Field*>()){};
         OptionsGroup(wxFrame* parent, std::string title) : 
             parent(parent), 
             title(title.c_str()), 
             staticbox(1),
             extra_column(false),
             label_width(0),
-            fields(std::vector<boost::any>())
+            fields(std::map<size_t, Field*>())
             { BUILD(); }
 
         OptionsGroup(wxFrame*, std::string, size_t label_width) :
@@ -48,7 +50,7 @@ class OptionsGroup {
             title(title.c_str()), 
             staticbox(1),
             extra_column(false),
-            fields(std::vector<boost::any>()),
+            fields(std::map<size_t, Field*>()),
             label_width(label_width) { BUILD(); }
 
         void append_line(const Line& line);
@@ -86,7 +88,7 @@ public:
 
 
 // Enumeration of configuration and UI types. 
-enum FieldTypes { 
+enum class FieldTypes { 
     DEFAULT,
     BOOLEAN, 
     INTEGER,
@@ -182,3 +184,5 @@ public:
 
 };
 }
+
+#endif

@@ -65,8 +65,13 @@ void OptionsGroup::append_line(const Line& line) {
         const Option& opt = line.options()[0];
         if (line.extra_widgets().size() && !wxIsEmpty(opt.sidetext) && line.extra_widgets().size() == 0) {
             Field* field = _build_field(opt);
-            grid_sizer->Add(field->sizer(), 0, (opt.full_width ? wxEXPAND : 0) | wxALIGN_CENTER_VERTICAL, 0);
-            if (field != nullptr) { delete field; }
+            if (field != nullptr) {
+                if (field->has_sizer()) {
+                    grid_sizer->Add(field->sizer(), 0, (opt.full_width ? wxEXPAND : 0) | wxALIGN_CENTER_VERTICAL, 0);
+                } else if (field->has_window()) {
+                    grid_sizer->Add(field->window(), 0, (opt.full_width ? wxEXPAND : 0) | wxALIGN_CENTER_VERTICAL, 0);
+                }
+            }
         }
     }
     // Otherwise, there's more than one option or a single option with sidetext -- make
@@ -74,6 +79,31 @@ void OptionsGroup::append_line(const Line& line) {
     wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
     grid_sizer->Add(sizer, 0, 0, 0);
     for (auto& option : line.options()) {
+        // add label if any
+        if (!wxIsEmpty(option.label)) {
+        }
+
+        // add field
+        Field* field = _build_field(option);
+        if (field != nullptr) {
+            if (field->has_sizer()) {
+                grid_sizer->Add(field->sizer(), 0, (option.full_width ? wxEXPAND : 0) | wxALIGN_CENTER_VERTICAL, 0);
+            } else if (field->has_window()) {
+                grid_sizer->Add(field->window(), 0, (option.full_width ? wxEXPAND : 0) | wxALIGN_CENTER_VERTICAL, 0);
+            }
+        }
+
+        if (!wxIsEmpty(option.sidetext)) {
+        }
+        if (option.side_widget.valid()) {
+            sizer->Add(option.side_widget.sizer(), 0, wxLEFT | wxALIGN_CENTER_VERTICAL, 1);
+        }
+        if (&option != &line.options().back()) {
+            sizer->AddSpacer(4);
+        }
+
+        // add side text if any
+        // add side widget if any
     }
     // Append extra sizers
     for (auto& widget : line.extra_widgets()) {
@@ -82,13 +112,13 @@ void OptionsGroup::append_line(const Line& line) {
 }
 
 Field* OptionsGroup::_build_field(const Option& opt) {
-    Field* local_field = nullptr;
+    Field* built_field = nullptr;
     switch (opt.type) {
         case FieldTypes::TEXT:
             break;
         default:
             break;
     }
-    return local_field;
+    return built_field;
 }
 }
