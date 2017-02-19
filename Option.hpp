@@ -27,31 +27,39 @@ enum class FieldTypes {
     I_TEXT,
     TEXT
 };
+
 class Option {
 private: 
+    // width, height are optional and will alter _size
     wxSize _size;
 public:
     // required values
     size_t opt_id;
     FieldTypes type;
     boost::any default_value;
+    // rest are optional, or have sensible defaults
     FieldTypes gui_type;
     std::string gui_flags;
     wxString label;
     wxString sidetext;
     wxString tooltip;
-    bool multiline;
-    bool full_width;
-    // width, height are optional and will alter _size
     boost::any min;
     boost::any max;
     std::vector<wxString> labels;
     std::vector<boost::any> values;
-    bool readonly; // can we just pull a const version of the object?
+
+    bool multiline;
+    bool full_width;
+    bool readonly;
+
     // define the default GUI input types based on the provided FieldType.
-    FieldTypes default_type(FieldTypes in); 
+    FieldTypes default_type(FieldTypes in) const; 
+
+
     Widget side_widget;
-    wxSize size() const { return _size; }
+    const wxSize& size() const { return _size; }
+
+    // Constructors
     Option(size_t opt_id, FieldTypes type, boost::any default_value, size_t width, size_t height, FieldTypes gui_type, std::string gui_flags, std::string label, std::string sidetext, std::string tooltip, bool multiline, bool full_width, boost::any min, boost::any max) :
     opt_id(opt_id),
     type(type),
@@ -108,10 +116,14 @@ public:
     tooltip(_("")),
     multiline(false),
     full_width(false),
-    min(0),
-    max(0),
+    min(boost::any()),
+    max(boost::any()),
     _size(wxDefaultSize)
     { gui_type = default_type(type); }
+
+    // Accessor pass-through for the underlying size
+    void set_width(int w) { _size.SetWidth(w); }
+    void set_height(int h) { _size.SetHeight(h); }
 
 };
 }

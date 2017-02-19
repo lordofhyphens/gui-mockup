@@ -12,8 +12,33 @@
 #include "Field.hpp"
 namespace Slic3r {
 
-class Line;
+// Abstraction cribbed from Slic3r::OptionGroup::Line
+// Unsure if templated class or function overloading is the appropriate thing here.
 class Option;
+class Line {
+private:
+    std::vector<Option> _options;
+    std::vector<Widget> _extra_widgets;
+    Widget _widget;
+    wxSizer* _sizer;
+    wxString _tooltip;
+public:
+    wxString label;
+    bool full_width;
+    wxSizer* sizer() const { return _sizer; }
+    Line() : label(wxT("")), _tooltip(wxT("")), _sizer(nullptr), full_width(false), _widget(Widget()) { }
+    Line(const Option& z) : label(z.label), _tooltip(z.tooltip), _sizer(nullptr), full_width(false), _widget(Widget()) { append_option(z); }
+    Line(const wxString& label, const wxString& tooltip) : label(label), _tooltip(tooltip), _sizer(nullptr), full_width(false), _widget(Widget()) { }
+    inline void append_option(const Option& z) { _options.push_back(z); };
+    void append_widget(const Widget& wid) { _extra_widgets.push_back(wid); }
+    std::vector<Option> options() const { return _options; }
+    const std::vector<Widget> extra_widgets() const { return _extra_widgets; }
+    bool has_sizer() const { return _sizer != nullptr; }
+    bool has_widget() const { return _widget.valid(); }
+    Widget widget() const { return _widget; }
+    const wxString tooltip() const { return _tooltip; }
+};
+
 
 // OptionsGroup building class, cribbed from Slic3r::OptionGroup
 // Usage: Instantitate, add individual items to it, and add its sizer to another wxWidgets sizer.
@@ -54,37 +79,16 @@ class OptionsGroup {
             label_width(label_width) { BUILD(); }
 
         void append_line(const Line& line);
-        Line create_single_option_line();
+        Line create_single_option_line(const Option& opt) { Line a = Line(opt); append_line(a); return a; }
         void append_single_option_line(const Line& line);
 
-        void disable() { _disabled = true; }
-        void enable() { _disabled = false; }
         wxSizer* sizer() { return _sizer; }
+        void disable() { for (auto& f: fields) f.second->disable(); }
+        void enable() { for (auto& f: fields) f.second->enable(); }
+        void _on_change(size_t opt_id, boost::any value);
+
 };
 
-// Abstraction cribbed from Slic3r::OptionGroup::Line
-// Unsure if templated class or function overloading is the appropriate thing here.
-class Line {
-private:
-    std::vector<Option> _options;
-    std::vector<Widget> _extra_widgets;
-    Widget _widget;
-    wxSizer* _sizer;
-    wxString _tooltip;
-public:
-    wxString label;
-    bool full_width;
-    wxSizer* sizer() const { return _sizer; }
-    Line(const Option& z) : _tooltip(wxT("")), _sizer(nullptr), full_width(false), _widget(Widget()) { append_option(z); }
-    inline void append_option(const Option& z) { _options.push_back(z); };
-    void append_widget(const Widget& wid) { _extra_widgets.push_back(wid); }
-    std::vector<Option> options() const { return _options; }
-    const std::vector<Widget> extra_widgets() const { return _extra_widgets; }
-    bool has_sizer() const { return _sizer != nullptr; }
-    bool has_widget() const { return _widget.valid(); }
-    Widget widget() const { return _widget; }
-    const wxString tooltip() const { return _tooltip; }
-};
 
 
 

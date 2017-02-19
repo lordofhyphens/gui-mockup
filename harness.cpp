@@ -42,9 +42,8 @@ bool MyApp::OnInit()
 MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
         : wxFrame(NULL, wxID_ANY, title, pos, size)
 {
-    wxLog::EnableLogging(true);
     Slic3r::OptionsGroup t = Slic3r::OptionsGroup(this, "Test!");
-    t.append_line(Slic3r::Line(Slic3r::Option(1, Slic3r::FieldTypes::TEXT, wxString(""), "Text field", "This is a generic text field", false)));
+    t.create_single_option_line(Slic3r::Option(1, Slic3r::FieldTypes::TEXT, wxString(""), "Text field", "This is a generic text field", false));
     wxMenu *menuFile = new wxMenu;
     wxSizer *sizer = new wxBoxSizer(wxVERTICAL);
     // create text ctrl with minimal size 100x60
