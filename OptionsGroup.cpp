@@ -105,15 +105,34 @@ void OptionsGroup::append_line(const Line& line) {
 Field* OptionsGroup::_build_field(const Option& opt) {
     Field* built_field = nullptr;
     switch (opt.type) {
-        case FieldTypes::TEXT:
+    /*
+        case FieldTypes::COLOR:
             {
-            printf("Making new textctrl\n");
-            TextCtrl* temp = new TextCtrl(_parent, opt);
-            printf("recasting textctrl\n");
+            ColorPicker* temp = new ColorPicker(_parent, opt);
             built_field = dynamic_cast<Field*>(temp);
             }
             break;
+        case FieldTypes::BOOLEAN:
+            {
+            Checkbox* temp = new Checkbox(_parent, opt);
+            built_field = dynamic_cast<Field*>(temp);
+            }
+            break;
+    */
+        case FieldTypes::SELECT:
+        case FieldTypes::SELECT_OPEN:
+            {
+            Choice* temp = new Choice(_parent, opt);
+            built_field = dynamic_cast<Field*>(temp);
+            }
+            break;
+        case FieldTypes::FLOAT:
+        case FieldTypes::TEXT:
         default:
+            {
+            Text* temp = new Text(_parent, opt);
+            built_field = dynamic_cast<Field*>(temp);
+            }
             break;
     }
     return built_field;

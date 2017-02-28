@@ -11,21 +11,19 @@ namespace Slic3r {
 //
 // Enumeration of configuration and UI types. 
 enum class FieldTypes { 
-    DEFAULT,
-    BOOLEAN, 
-    INTEGER,
-    COLOR, 
-    SELECT, 
-    SELECT_OPEN, 
-    F_ENUM_OPEN, 
-    I_ENUM_OPEN, 
-    I_ENUM_CLOSED,
-    POINT,
-    SLIDER,
-    FLOAT,
-    F_TEXT,
-    I_TEXT,
-    TEXT
+    DEFAULT,       // free-form textbox
+    BOOLEAN,       // Checkbox 
+    INTEGER,       // Spinner control
+    COLOR,         // color picker
+    SELECT,        // enumerated input 
+    SELECT_OPEN,   // enumerated input, free form
+    F_ENUM_OPEN,   // numeric choice, free form input
+    I_ENUM_OPEN,   // numeric choice, free form input
+    I_ENUM_CLOSED, // numeric choice, restricted input
+    POINT,         // 2D/3D Point
+    SLIDER,        // Slider 
+    TEXT,          // Textbox
+    FLOAT          // 
 };
 
 class Option {
@@ -72,7 +70,8 @@ public:
     full_width(full_width),
     min(min),
     max(max),
-    _size(wxSize(width,height))
+    _size(wxSize(width,height)),
+    values(std::vector<boost::any>())
     {}
 
     Option(size_t opt_id, FieldTypes type, boost::any default_value, FieldTypes gui_type, std::string gui_flags, std::string label, std::string sidetext, std::string tooltip, bool multiline, bool full_width, boost::any min, boost::any max) :
@@ -87,7 +86,8 @@ public:
     full_width(full_width),
     min(min),
     max(max),
-    _size(wxDefaultSize)
+    _size(wxDefaultSize),
+    values(std::vector<boost::any>())
     {}
         
     Option(size_t opt_id, FieldTypes type, boost::any default_value, std::string label, std::string tooltip, bool full_width, boost::any min = boost::any(), boost::any max = boost::any()) :
@@ -102,7 +102,8 @@ public:
     full_width(full_width),
     min(min),
     max(max),
-    _size(wxDefaultSize)
+    _size(wxDefaultSize),
+    values(std::vector<boost::any>())
     {
         gui_type = default_type(type);
     }
@@ -118,7 +119,8 @@ public:
     full_width(false),
     min(boost::any()),
     max(boost::any()),
-    _size(wxDefaultSize)
+    _size(wxDefaultSize),
+    values(std::vector<boost::any>())
     { gui_type = default_type(type); }
 
     // Accessor pass-through for the underlying size
