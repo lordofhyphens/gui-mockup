@@ -118,11 +118,4 @@ Field* OptionsGroup::_build_field(const Option& opt) {
     }
     return built_field;
 }
-void OptionsGroup::_on_change(size_t opt_id, boost::any value) {
-    try {
-        fields.at(opt_id)->_on_change(opt_id, value);
-    } catch (std::out_of_range& e){ 
-        // TODO: Log failure
-    }
-}
 }

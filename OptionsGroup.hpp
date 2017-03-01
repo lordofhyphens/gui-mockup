@@ -85,8 +85,6 @@ class OptionsGroup {
         wxSizer* sizer() { return _sizer; }
         void disable() { for (auto& f: fields) f.second->disable(); }
         void enable() { for (auto& f: fields) f.second->enable(); }
-        void _on_change(size_t opt_id, boost::any value);
-
 };
 
 
