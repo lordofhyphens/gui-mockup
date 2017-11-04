@@ -6,11 +6,10 @@
 #include <functional>
 
 #include "libslic3r/Config.hpp"
+#include "libslic3r/PrintConfig.hpp"
 #include "libslic3r/libslic3r.h"
 
 #include "Field.hpp"
-
-
 
 namespace Slic3r { namespace GUI {
 
@@ -27,13 +26,13 @@ struct Option {
     bool readonly {false};
 
     Option(const ConfigOptionDef& _opt, t_config_option_key id) : opt(_opt), opt_id(id) {};
-}
+};
 
 /// Represents option lines
 class Line {
     public:
-        wxString label {wxString(""s)};
-        wxString label_tooltip {wxString(""s)};
+        wxString label {wxString("")};
+        wxString label_tooltip {wxString("")};
         size_t full_width {0}; 
         wxSizer* sizer {nullptr};
 
@@ -78,7 +77,7 @@ class ConfigOptionsGroup: public OptionsGroup {
     public:
         /// reference to libslic3r config
         const std::shared_ptr<DynamicPrintConfig> config {nullptr};
-        bool full_labels {0}
+        bool full_labels {0};
 };
 
 }}

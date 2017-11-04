@@ -3,8 +3,6 @@
 
 #include <utility>
 
-
-
 namespace Slic3r { namespace GUI {
 
     void OptionsGroup::build_field(const t_config_option_key& id) {

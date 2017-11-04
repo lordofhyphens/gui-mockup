@@ -4,11 +4,13 @@
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
     #include <wx/wx.h>
+#endif
+
 #include <memory>
 #include <boost/any.hpp>
 
-
 #include "libslic3r.h"
+#include "libslic3r/Config.hpp"
 
 #if SLIC3R_CPPVER==11
     // C++14 has make_unique, C++11 doesn't. This is really useful so we're going to steal it.
@@ -19,8 +21,10 @@
         return ret;
     }
 #endif
-using t_field = std::unique_ptr<Field>;
 
+namespace Slic3r { namespace GUI {
+class Field; // forward declaration 
+using t_field = std::unique_ptr<Field>;
 
 class Field { 
     protected:
@@ -106,3 +110,5 @@ public:
 
 
 #endif 
+}}
+

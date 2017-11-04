@@ -8,6 +8,8 @@
 #endif
 #include "OptionsGroup.hpp"
 #include "log.hpp"
+
+using namespace Slic3r;
 class MyApp: public wxApp
 {
 public:
@@ -42,11 +44,11 @@ bool MyApp::OnInit()
 MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
         : wxFrame(NULL, wxID_ANY, title, pos, size)
 {
-    Slic3r::OptionsGroup t = Slic3r::OptionsGroup(this, "Test!");
-    t.create_single_option_line(Slic3r::Option(1, Slic3r::FieldTypes::TEXT, wxString(""), "Text field", "This is a generic text field", false));
+    GUI::OptionsGroup t = GUI::OptionsGroup(this, "Test!");
+    t.create_single_option_line(GUI::GUI::Option(1, GUI::FieldTypes::TEXT, wxString(""), "Text field", "This is a generic text field", false));
 
     // create the Option item ahead of time for a combo field so we can populate it.
-    Slic3r::Option cbox = Slic3r::Option(2, Slic3r::FieldTypes::SELECT, wxString(""), "Combo field", "This is a generic text field", false);
+    GUI::Option cbox = GUI::Option(2, GUI::FieldTypes::SELECT, wxString(""), "Combo field", "This is a generic text field", false);
     cbox.labels.push_back("Item1");
     cbox.labels.push_back("Item2");
     cbox.labels.push_back("Item3");
