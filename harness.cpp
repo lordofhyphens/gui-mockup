@@ -44,34 +44,7 @@ bool MyApp::OnInit()
 MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
         : wxFrame(NULL, wxID_ANY, title, pos, size)
 {
-    GUI::OptionsGroup t = GUI::OptionsGroup(this, "Test!");
-    t.create_single_option_line(GUI::GUI::Option(1, GUI::FieldTypes::TEXT, wxString(""), "Text field", "This is a generic text field", false));
 
-    // create the Option item ahead of time for a combo field so we can populate it.
-    GUI::Option cbox = GUI::Option(2, GUI::FieldTypes::SELECT, wxString(""), "Combo field", "This is a generic text field", false);
-    cbox.labels.push_back("Item1");
-    cbox.labels.push_back("Item2");
-    cbox.labels.push_back("Item3");
-    // make a line for it
-    t.create_single_option_line(cbox);
-    wxMenu *menuFile = new wxMenu;
-    wxSizer *sizer = new wxBoxSizer(wxVERTICAL);
-    // create text ctrl with minimal size 100x60
-    sizer->Add(t.sizer());
-    menuFile->Append(ID_Hello, "&Hello...\tCtrl-H",
-                     "Help string shown in status bar for this menu item");
-    menuFile->AppendSeparator();
-    menuFile->Append(wxID_EXIT);
-    wxMenu *menuHelp = new wxMenu;
-    menuHelp->Append(wxID_ABOUT);
-    wxMenuBar *menuBar = new wxMenuBar;
-    menuBar->Append( menuFile, "&File" );
-    menuBar->Append( menuHelp, "&Help" );
-
-    SetMenuBar( menuBar );
-    CreateStatusBar();
-    SetSizerAndFit(sizer);
-    SetStatusText( "Welcome to wxWidgets!" );
 }
 void MyFrame::OnExit(wxCommandEvent& event)
 {
