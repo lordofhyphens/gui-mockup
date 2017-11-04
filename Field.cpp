@@ -1,58 +1,24 @@
 #include "Field.hpp"
-#include <wx/wxprec.h>
-#ifndef WX_PRECOMP
-    #include <wx/wx.h>
-#endif
 
-namespace Slic3r {
 
-void Text::BUILD() {
-    wxString default_value = "";
-    // Empty wxString object fails cast, default to "" if 
-    // the recast fails from boost::any.
-    try {
-        default_value = boost::any_cast<wxString>(opt.default_value);
-    } catch (const boost::bad_any_cast& e) {
-        //TODO log error with wxLog
+namespace Slic3r { namespace GUI {
+
+    void TextCtrl::BUILD() {
+        auto size = wxSize(wxDefaultSize);
+        if (opt.height >= 0) size.SetHeight(opt.height);
+        if (opt.width >= 0) size.SetWidth(opt.width);
+
+        auto temp = new wxTextCtrl(parent, wxID_ANY, wxString(opt.default_value->getString()), wxDefaultPosition, size, (opt.multiline ? wxTE_MULTILINE : 0));
+
+        if (opt.tooltip.length() > 0) { window->SetToolTip(opt.tooltip); }
+
+//        _on_change = [=](wxCommandEvent& a) { __on_change(a);};
+
+//        window->Bind(wxEVT_TEXT, _on_change, window->GetId());
+//        window->Bind(wxEVT_KILL_FOCUS, _on_kill_focus, window->GetId());
+
+        // recast as a wxWindow to fit the calling convention
+        window = dynamic_cast<wxWindow*>(temp);
     }
-    wxTextCtrl* temp = new wxTextCtrl(_parent, opt.opt_id, default_value, wxDefaultPosition, opt.size(), (opt.multiline ? wxTE_MULTILINE : 0));
+}}
 
-    _on_change = [=](wxCommandEvent& a) { this->__on_change(a);};
-
-    // This replaces the generic EVT_TEXT call to set the table up, it works with function objects.
-    temp->Bind(wxEVT_TEXT, _on_change, opt.opt_id);
-
-    // recast as a wxWindow to fit the calling convention
-    _window = dynamic_cast<wxWindow*>(temp);
-}
-
-// Fixed (temporary) function. We can (and probably should) use lambdas instead.
-void Text::__on_change(wxCommandEvent& a) {
-    printf("Calling _on_change for %d.\n", opt.opt_id);
-}
-
-void Choice::BUILD() {
-    wxString default_value = "";
-    // Empty wxString object fails cast, default to "" if 
-    // the recast fails from boost::any.
-    try {
-        default_value = boost::any_cast<wxString>(opt.default_value);
-    } catch (const boost::bad_any_cast& e) {
-        //TODO log error with wxLog
-    }
-    wxArrayString tmp; 
-    for (const auto& i : opt.labels) {
-        tmp.Add(_(i));
-    }
-    wxComboBox* temp = new wxComboBox(_parent, opt.opt_id, default_value, wxDefaultPosition, opt.size(),
-    tmp, wxCB_DROPDOWN | wxCB_READONLY);
-
-    _on_change = [=](wxCommandEvent& a) { printf("Calling _on_change for %d.\n", opt.opt_id); };
-
-    // This replaces the generic EVT_TEXT call to set the table up, it works with function objects.
-    temp->Bind(wxEVT_TEXT, _on_change, opt.opt_id);
-
-    // recast as a wxWindow to fit the calling convention
-    _window = dynamic_cast<wxWindow*>(temp);
-}
-}

@@ -1,140 +1,42 @@
 #include "OptionsGroup.hpp"
-#include "Field.hpp"
+#include "ConfigExceptions.hpp"
 
-// Translate the ifdef 
-#ifdef __WXOSX__
-    #define wxOSX true
-#else
-    #define wxOSX false
-#endif
+#include <utility>
 
-#define BORDER(a, b) ((wxOSX ? a : b))
 
-namespace Slic3r {
 
-void OptionsGroup::BUILD() {
-    if (staticbox) {
-        wxStaticBox* box = new wxStaticBox(_parent, -1, title);
-        _sizer = new wxStaticBoxSizer(box, wxVERTICAL);
-    } else {
-        _sizer = new wxBoxSizer(wxVERTICAL);
-    }
-    size_t num_columns = 1;
-    if (label_width != 0) ++num_columns;
-    if (extra_column != 0) ++num_columns;
+namespace Slic3r { namespace GUI {
 
-    _grid_sizer = new wxFlexGridSizer(0, num_columns, 0, 0);
-    _grid_sizer->SetFlexibleDirection(wxHORIZONTAL);
-    _grid_sizer->AddGrowableCol(label_width > 0);
-    _sizer->Add(_grid_sizer, 0, wxEXPAND | wxALL, BORDER(0,5));
-}
+    void OptionsGroup::build_field(const t_config_option_key& id) {
+        const ConfigOptionDef& opt = options.at(id);
 
-void OptionsGroup::append_line(const Line& line) {
-    if (line.has_sizer() || (line.has_widget() && line.full_width)) {
-        wxASSERT(line.sizer() != nullptr);
-        _sizer->Add( (line.has_sizer() ? line.sizer() : line.widget().sizer()), 0, wxEXPAND | wxALL, BORDER(0, 15));
-        return;
-    }
-    wxSizer* grid_sizer = _grid_sizer;
-    // If we have an extra column, build it.
-    // If there's a label, build it.
-    if (label_width != 0) {
-        wxStaticText* label = new wxStaticText(_parent, -1, _(line.label) + ":", wxDefaultPosition);
-        label->Wrap(label_width);
-        if (wxIsEmpty(line.tooltip())) { label->SetToolTip(line.tooltip()); }
-        grid_sizer->Add(label, 0, wxALIGN_CENTER_VERTICAL, 0);
-    }
-    // If we have a widget, add it to the sizer
-    if (line.has_widget()) {
-        grid_sizer->Add(line.widget().sizer(), 0, wxEXPAND | wxALL, BORDER(0,15));
-        return;
-    }
-    // If we have a single option with no sidetext just add it directly to the grid sizer
-    if (line.options().size() == 1) {
-        const Option& opt = line.options()[0];
-        if (line.extra_widgets().size() && !wxIsEmpty(opt.sidetext) && line.extra_widgets().size() == 0) {
-            Field* field = _build_field(opt);
-            if (field != nullptr) {
-                if (field->has_sizer()) {
-                    grid_sizer->Add(field->sizer(), 0, (opt.full_width ? wxEXPAND : 0) | wxALIGN_CENTER_VERTICAL, 0);
-                } else if (field->has_window()) {
-                    grid_sizer->Add(field->window(), 0, (opt.full_width ? wxEXPAND : 0) | wxALIGN_CENTER_VERTICAL, 0);
-                }
+        // Check the gui_type field first, fall through
+        // is the normal type.
+        if (opt.gui_type.compare("select") == 0) {
+        } else if (opt.gui_type.compare("select_open") == 0) {
+        } else if (opt.gui_type.compare("color") == 0) {
+        } else if (opt.gui_type.compare("f_enum_open") == 0 || 
+                   opt.gui_type.compare("i_enum_open") == 0 ||
+                   opt.gui_type.compare("i_enum_closed") == 0) {
+        } else if (opt.gui_type.compare("slider") == 0) {
+        } else if (opt.gui_type.compare("i_spin") == 0) { // Spinctrl
+        } else { 
+            switch (opt.type) {
+                case coFloatOrPercent:
+                case coPercent:
+                case coFloat:
+                case coString:
+                    fields.emplace(id, STDMOVE(TextCtrl::Create<TextCtrl>(opt,id)));
+                    break;
+                case coNone:   break;
+                default:
+                    throw ConfigGUITypeError(""); break;
             }
         }
+        // Grab a reference to fields for convenience
+        t_field& field = fields[id];
+        // assign function objects for callbacks, etc.
     }
-    // Otherwise, there's more than one option or a single option with sidetext -- make
-    // a horizontal sizer to arrange things.
-    wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
-    grid_sizer->Add(sizer, 0, 0, 0);
-    for (auto& option : line.options()) {
-        // add label if any
-        if (!wxIsEmpty(option.label)) {
-            wxStaticText* field_label = new wxStaticText(_parent, -1, _(option.label) + ":", wxDefaultPosition, wxDefaultSize);
-            sizer->Add(field_label, 0, wxALIGN_CENTER_VERTICAL,0);
-        }
 
-        // add field
-        Field* field = _build_field(option);
-        if (field != nullptr) {
-            if (field->has_sizer()) {
-                sizer->Add(field->sizer(), 0, (option.full_width ? wxEXPAND : 0) | wxALIGN_CENTER_VERTICAL, 0);
-            } else if (field->has_window()) {
-                sizer->Add(field->window(), 0, (option.full_width ? wxEXPAND : 0) | wxALIGN_CENTER_VERTICAL, 0);
-            }
-        }
 
-        if (!wxIsEmpty(option.sidetext)) {
-        }
-        if (option.side_widget.valid()) {
-            sizer->Add(option.side_widget.sizer(), 0, wxLEFT | wxALIGN_CENTER_VERTICAL, 1);
-        }
-        if (&option != &line.options().back()) {
-            sizer->AddSpacer(4);
-        }
-
-        // add side text if any
-        // add side widget if any
-    }
-    // Append extra sizers
-    for (auto& widget : line.extra_widgets()) {
-        _sizer->Add(widget.sizer(), 0, wxLEFT | wxALIGN_CENTER_VERTICAL, 4);
-    }
-}
-
-Field* OptionsGroup::_build_field(const Option& opt) {
-    Field* built_field = nullptr;
-    switch (opt.type) {
-    /*
-        case FieldTypes::COLOR:
-            {
-            ColorPicker* temp = new ColorPicker(_parent, opt);
-            built_field = dynamic_cast<Field*>(temp);
-            }
-            break;
-        case FieldTypes::BOOLEAN:
-            {
-            Checkbox* temp = new Checkbox(_parent, opt);
-            built_field = dynamic_cast<Field*>(temp);
-            }
-            break;
-    */
-        case FieldTypes::SELECT:
-        case FieldTypes::SELECT_OPEN:
-            {
-            Choice* temp = new Choice(_parent, opt);
-            built_field = dynamic_cast<Field*>(temp);
-            }
-            break;
-        case FieldTypes::FLOAT:
-        case FieldTypes::TEXT:
-        default:
-            {
-            Text* temp = new Text(_parent, opt);
-            built_field = dynamic_cast<Field*>(temp);
-            }
-            break;
-    }
-    return built_field;
-}
-}
+}}

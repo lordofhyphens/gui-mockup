@@ -1,95 +1,84 @@
-#ifndef OPTIONSGROUP_HPP
-#define OPTIONSGROUP_HPP
-
-#include <wx/wxprec.h>
-#ifndef WX_PRECOM
 #include <wx/wx.h>
-#endif
+#include <wx/stattext.h>
+#include <wx/settings.h>
 
-#include <boost/any.hpp>
 #include <map>
-#include "Widget.hpp"
+#include <functional>
+
+#include "libslic3r/Config.hpp"
+#include "libslic3r/libslic3r.h"
+
 #include "Field.hpp"
-namespace Slic3r {
-
-// Abstraction cribbed from Slic3r::OptionGroup::Line
-// Unsure if templated class or function overloading is the appropriate thing here.
-class Option;
-class Line {
-private:
-    std::vector<Option> _options;
-    std::vector<Widget> _extra_widgets;
-    Widget _widget;
-    wxSizer* _sizer;
-    wxString _tooltip;
-public:
-    wxString label;
-    bool full_width;
-    wxSizer* sizer() const { return _sizer; }
-    Line() : label(wxT("")), _tooltip(wxT("")), _sizer(nullptr), full_width(false), _widget(Widget()) { }
-    Line(const Option& z) : label(z.label), _tooltip(z.tooltip), _sizer(nullptr), full_width(false), _widget(Widget()) { append_option(z); }
-    Line(const wxString& label, const wxString& tooltip) : label(label), _tooltip(tooltip), _sizer(nullptr), full_width(false), _widget(Widget()) { }
-    inline void append_option(const Option& z) { _options.push_back(z); };
-    void append_widget(const Widget& wid) { _extra_widgets.push_back(wid); }
-    std::vector<Option> options() const { return _options; }
-    const std::vector<Widget> extra_widgets() const { return _extra_widgets; }
-    bool has_sizer() const { return _sizer != nullptr; }
-    bool has_widget() const { return _widget.valid(); }
-    Widget widget() const { return _widget; }
-    const wxString tooltip() const { return _tooltip; }
-};
-
-
-// OptionsGroup building class, cribbed from Slic3r::OptionGroup
-// Usage: Instantitate, add individual items to it, and add its sizer to another wxWidgets sizer.
-class OptionsGroup {
-    private:
-        bool _disabled;
-        wxFlexGridSizer* _grid_sizer;
-        wxSizer* _sizer;
-        void BUILD(); 
-        const bool staticbox;
-        wxFrame* _parent;
-        std::map<size_t, Field*> fields;
-        Field* _build_field(const Option& opt);
-    public:
-        const wxString title;
-
-        size_t label_width;
-        wxFont label_font;
-        wxFont sidetext_font;
-        bool extra_column;
-
-        OptionsGroup() : _parent(nullptr), title(wxT("")), staticbox(1), fields(std::map<size_t, Field*>()){};
-        OptionsGroup(wxFrame* parent, std::string title) : 
-            _parent(parent), 
-            title(title.c_str()), 
-            staticbox(1),
-            extra_column(false),
-            label_width(0),
-            fields(std::map<size_t, Field*>())
-            { BUILD(); }
-
-        OptionsGroup(wxFrame* parent, std::string, size_t label_width) :
-            _parent(parent), 
-            title(title.c_str()), 
-            staticbox(1),
-            extra_column(false),
-            fields(std::map<size_t, Field*>()),
-            label_width(label_width) { BUILD(); }
-
-        void append_line(const Line& line);
-        Line create_single_option_line(const Option& opt) { Line a = Line(opt); append_line(a); return a; }
-        void append_single_option_line(const Line& line);
-
-        wxSizer* sizer() { return _sizer; }
-        void disable() { for (auto& f: fields) f.second->disable(); }
-        void enable() { for (auto& f: fields) f.second->enable(); }
-};
 
 
 
+namespace Slic3r { namespace GUI {
 
+/// Widget type describes a function object that returns a wxWindow (our widget) and accepts a wxWidget (parent window).
+using widget_t = std::function<wxWindow*(wxWindow*)>;
+
+class StaticText;
+
+/// Wraps a ConfigOptionDef and adds function object for creating a side_widget.
+struct Option {
+    ConfigOptionDef opt {ConfigOptionDef()}; 
+    t_config_option_key opt_id {""};
+    widget_t side_widget {nullptr};
+    bool readonly {false};
+
+    Option(const ConfigOptionDef& _opt, t_config_option_key id) : opt(_opt), opt_id(id) {};
 }
 
-#endif
+/// Represents option lines
+class Line {
+    public:
+        wxString label {wxString(""s)};
+        wxString label_tooltip {wxString(""s)};
+        size_t full_width {0}; 
+        wxSizer* sizer {nullptr};
+
+        void append_option();
+
+    private:
+};
+
+using t_optionfield_map = std::map<t_config_option_key, t_field>;
+
+class OptionsGroup {
+private: 
+    const t_optiondef_map& options;
+
+    /// Field list, contains unique_ptrs of the derived type.
+    /// using types that need to know what it is beyond the public interface 
+    /// need to cast based on the related ConfigOptionDef.
+    t_optionfield_map fields;
+    bool _disabled {false};
+    wxGridSizer* _grid_sizer {nullptr};
+
+public:
+
+    const wxWindow* parent {nullptr};
+    const wxString title {wxString("")};
+    size_t label_width {180};
+    wxSizer* sizer {nullptr};
+    const bool staticbox {true};
+
+    wxFont sidetext_font {wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT) };
+    wxFont label_font {wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT) };
+
+    /// Generate a wxSizer or wxWindow from a configuration option
+    /// Precondition: opt resolves to a known ConfigOption
+    /// Postcondition: fields contains a wx gui object.
+    void build_field(const t_config_option_key& id);
+
+    OptionsGroup(wxWindow* parent, std::string title, const ConfigDef& configs) : parent(parent), title(wxString(title)), options(configs.options) {};
+};
+
+class ConfigOptionsGroup: public OptionsGroup {
+    public:
+        /// reference to libslic3r config
+        const std::shared_ptr<DynamicPrintConfig> config {nullptr};
+        bool full_labels {0}
+};
+
+}}
