@@ -1,0 +1,7 @@
+*.o
+*.swp
+CMakeCache.txt
+CMakeFiles
+*.a
+slic3r
+cmake_install.cmake

@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 2.8)
 project (slic3r)
 
 # only on newer GCCs: -ftemplate-backtrace-limit=0
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -DM_PI=3.14159265358979323846 -D_GLIBCXX_USE_C99 -DHAS_BOOL -DNOGDI -DBOOST_ASIO_DISABLE_KQUEUE `wx-config --cxxflags`")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -DM_PI=3.14159265358979323846 -D_GLIBCXX_USE_C99 -DHAS_BOOL -DNOGDI -DBOOST_ASIO_DISABLE_KQUEUE")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -DSLIC3R_DEBUG")
 
 if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.7.0)
@@ -145,7 +145,7 @@ set_target_properties(bsystem PROPERTIES IMPORTED_LOCATION ${bsystem_l})
 find_library(bthread_l boost_thread)
 add_library(bthread STATIC IMPORTED)
 set_target_properties(bthread PROPERTIES IMPORTED_LOCATION ${bthread_l})
-include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${Boost_INCLUDE_DIRS} ${wxWidgets_INCLUDE_DIRS})
 
 #find_package(wxWidgets)
 #disable wx for the time being - we're not building any of the gui yet
@@ -153,7 +153,7 @@ IF(CMAKE_HOST_UNIX)
     #set(Boost_LIBRARIES bsystem bthread bfilesystem)
 ENDIF(CMAKE_HOST_UNIX)
 
-target_link_libraries (slic3r libslic3r admesh BSpline clipper expat polypartition poly2tri testgui ${Boost_LIBRARIES})
+target_link_libraries (slic3r libslic3r admesh BSpline clipper expat polypartition poly2tri testgui ${Boost_LIBRARIES} ${wxWidgets_LIBRARIES})
 
 IF(wxWidgets_FOUND)
     MESSAGE("wx found!")
