@@ -40,6 +40,7 @@ namespace Slic3r { namespace GUI {
         }
         // Grab a reference to fields for convenience
         const t_field& field = fields[id];
+        field->on_change = [this](std::string id, boost::any val) {   };
         field->parent = parent();
         // assign function objects for callbacks, etc.
         return field;
@@ -109,6 +110,15 @@ namespace Slic3r { namespace GUI {
         tmp.opt.label = std::string("");
         retval.append_option(tmp);
         return retval;
+    }
+
+    void OptionsGroup::_on_change(t_config_option_key id, config_value value) {
+        if (on_change != nullptr)
+            on_change(id, value);
+    }
+
+    void OptionsGroup::_on_kill_focus (t_config_option_key id) { 
+        // do nothing.
     }
 
 

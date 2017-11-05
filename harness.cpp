@@ -11,6 +11,7 @@
 #include "libslic3r/PrintConfig.hpp"
 #include "libslic3r/Config.hpp"
 #include "libslic3r/libslic3r.h"
+#include "slic3r_gui.hpp"
 
 void confess_at(char const*, int, char const*, char const*, ...) {
 }
@@ -65,6 +66,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
     auto vsizer = new wxBoxSizer(wxVERTICAL); 
     this->SetSizer(vsizer);
     auto optgroup = GUI::ConfigOptionsGroup(this, "Custom GCode", &print_config);
+    optgroup.on_change = ON_CHANGE(=,{ });
     vsizer->Add(optgroup.sizer, 0, wxEXPAND|wxALL, 10);
 
     optgroup.append_single_option_line(GUI::Option(*(config.def->get("before_layer_gcode")), "before_layer_gcode"));
