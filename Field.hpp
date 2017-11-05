@@ -33,6 +33,10 @@ class Field {
     bool _enable {false};
 
     public:
+    
+    /// parent wx item, opportunity to refactor (probably not necessary - data duplication)
+    wxWindow* parent {nullptr};
+
     /// Copy of ConfigOption for deduction purposes
     const ConfigOptionDef opt {ConfigOptionDef()}; 
     const t_config_option_key opt_id {""};
@@ -45,33 +49,27 @@ class Field {
     /// subclasses should overload with a specific version
     virtual boost::any get_value() = 0;
 
-    /// parent wx item, opportunity to refactor (probably not necessary - data duplication)
-    wxWindow* parent {nullptr};
-
-    // Modern C++ note - brace initializer.
 
     Field(const ConfigOptionDef& opt, const t_config_option_key& id) : opt(opt), opt_id(id) {};
     Field(wxWindow* parent, const ConfigOptionDef& opt, const t_config_option_key& id) : parent(parent), opt(opt), opt_id(id) {};
-    Field(wxWindow* parent, const ConfigOptionDef& opt, const t_config_option_key& id, bool enable) : parent(parent), opt(opt), opt_id(id), _enable(enable) {};
+    Field(wxWindow* parent, const ConfigOptionDef& opt, const t_config_option_key& id, bool enable) : _enable(enable), parent(parent), opt(opt), opt_id(id) {};
 
     /// Finish constructing the Field's wxWidget-related properties, including setting its own sizer, etc.
     virtual void BUILD() = 0;
 
     /// If you don't know what you are getting back, check both methods for nullptr. 
-    /// 
     virtual wxSizer*  getSizer()  { return nullptr; }
     virtual wxWindow* getWindow() { return nullptr; }
 
 
     /// Factory method for generating new derived classes.
     template<class T>
-    static t_field Create(const ConfigOptionDef& opt, const t_config_option_key& id)  // interface for creating shared objects
+    static t_field Create(wxWindow* parent, const ConfigOptionDef& opt, const t_config_option_key& id)  // interface for creating shared objects
     {
-        auto p = make_unique<T>(opt, id);
-        p->BUILD();
+        auto p = make_unique<T>(parent, opt, id);
+        p->PostInitialize();
         return p;
     }
-
     virtual void enable() = 0;
     virtual void disable() = 0;
     
@@ -85,7 +83,7 @@ inline bool is_bad_field(const t_field& obj) { return obj->getSizer() == nullptr
 inline bool is_window_field(const t_field& obj) { return !is_bad_field(obj) && obj->getWindow() != nullptr; }
 
 /// Covenience function to determine whether this field is a valid sizer field.
-inline bool is_sizer_field(const t_field& obj) { return !is_window_field(obj); }
+inline bool is_sizer_field(const t_field& obj) { return !is_bad_field(obj) && obj->getSizer() != nullptr; }
 
 class TextCtrl : public Field {
     using Field::Field;

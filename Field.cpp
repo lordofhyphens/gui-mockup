@@ -10,7 +10,8 @@ namespace Slic3r { namespace GUI {
 
         auto temp = new wxTextCtrl(parent, wxID_ANY, wxString(opt.default_value->getString()), wxDefaultPosition, size, (opt.multiline ? wxTE_MULTILINE : 0));
 
-        if (opt.tooltip.length() > 0) { window->SetToolTip(opt.tooltip); }
+        if (opt.tooltip.length() > 0) { temp->SetToolTip(opt.tooltip); }
+        std::cerr << "Set tooltip.\n";
 
 //        _on_change = [=](wxCommandEvent& a) { __on_change(a);};
 
@@ -19,6 +20,8 @@ namespace Slic3r { namespace GUI {
 
         // recast as a wxWindow to fit the calling convention
         window = dynamic_cast<wxWindow*>(temp);
+
+        std::cerr << "Finished TextCtrl::BUILD\n";
     }
 }}
 
